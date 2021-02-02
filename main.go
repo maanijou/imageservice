@@ -9,12 +9,13 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/maanijou/imageservice/database"
 	"github.com/maanijou/imageservice/middleware"
 )
 
 func main() {
 	log.Println("Running Image app.")
-
+	database.InitDatabase("image")
 	sm := mux.NewRouter().StrictSlash(true) // ignoring trailing slash
 	sm = sm.PathPrefix("/api/v1/").Subrouter()
 
