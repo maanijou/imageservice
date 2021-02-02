@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/maanijou/imageservice/middleware"
 )
 
 func main() {
@@ -17,6 +18,8 @@ func main() {
 	sm := mux.NewRouter().StrictSlash(true) // ignoring trailing slash
 	sm = sm.PathPrefix("/api/v1/").Subrouter()
 
+	sm.Use(middleware.LoggingMiddleware)
+	sm.Use(middleware.CorsMiddleware)
 	// A quick test if server is up and running!
 	sm.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json; charset=UTF-8")
