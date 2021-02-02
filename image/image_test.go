@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/maanijou/imageservice/database"
 	"github.com/maanijou/imageservice/image"
 )
@@ -26,12 +28,39 @@ func TestMain(m *testing.M) {
 func setup() error {
 	log.Println("Setup image test")
 	err := database.InitDatabase("test")
-	err = os.ErrClosed
+	if err != nil {
+		return err
+	}
+	err = database.GlobalDB.AutoMigrate(&image.Image{})
 	if err != nil {
 		return err
 	}
 	database.GlobalDB.AutoMigrate(&image.Image{})
 	return nil
+}
+
+func TestDbImage(t *testing.T) {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		t.Error("Error creating new UUID for the image")
+	}
+	img := image.Image{
+		ID:       id,
+		FileName: "test.png",
+		FileSize: 100,
+		MimeType: "image/png",
+	}
+	err = img.CreateImage()
+	if err != nil {
+		t.Errorf("Error adding image to the database\n")
+	}
+	got, err := image.GetImageByID(id)
+	if err != nil {
+		t.Errorf("Error getting the image\n")
+	}
+	if got.FileName != img.FileName {
+		t.Errorf("Error getting the image\n")
+	}
 }
 
 func TestImageUpload(t *testing.T) {
