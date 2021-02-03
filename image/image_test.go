@@ -29,6 +29,12 @@ import (
 var sm *mux.Router
 var clearThese []string
 
+// TODO More tests:
+// Check for file size
+// Check multiple file uploads
+// Check for wrong file contents
+// Test coverage
+
 func TestMain(m *testing.M) {
 	route, err := setup()
 	sm = route
@@ -242,9 +248,57 @@ func TestImageUpload(t *testing.T) {
 	}
 }
 
-// TODO More tests:
-// Check for file size
-// Check multiple file uploads
-// Check for wrong file contents
-// Benchmarking conversion
-// Test coverage
+func BenchmarkDownloadGifConversion(b *testing.B) {
+	req, err := http.NewRequest(
+		"GET",
+		"/api/v1/image/269e6804-7b8e-4504-bf7e-fbf2d2bbc926?ext=gif",
+		nil)
+	if err != nil {
+		b.Error(err)
+		b.FailNow()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		rr := httptest.NewRecorder()
+		handler := http.Handler(sm)
+		handler.ServeHTTP(rr, req)
+	}
+}
+func BenchmarkDownloadJPGConversion(b *testing.B) {
+	req, err := http.NewRequest(
+		"GET",
+		"/api/v1/image/269e6804-7b8e-4504-bf7e-fbf2d2bbc926?ext=jpg",
+		nil)
+	if err != nil {
+		b.Error(err)
+		b.FailNow()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		rr := httptest.NewRecorder()
+		handler := http.Handler(sm)
+		handler.ServeHTTP(rr, req)
+	}
+}
+
+func BenchmarkParalellDownloadJPGConversion(b *testing.B) {
+	req, err := http.NewRequest(
+		"GET",
+		"/api/v1/image/269e6804-7b8e-4504-bf7e-fbf2d2bbc926?ext=jpg",
+		nil)
+	if err != nil {
+		b.Error(err)
+		b.FailNow()
+	}
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			rr := httptest.NewRecorder()
+			handler := http.Handler(sm)
+			handler.ServeHTTP(rr, req)
+			if rr.Code != 200 {
+				b.Errorf("Unexpected StatusCode, expected: %d, Got: %d", 200, rr.Code)
+			}
+		}
+	})
+}
