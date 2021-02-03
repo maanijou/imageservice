@@ -10,23 +10,33 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/maanijou/imageservice/database"
+	"github.com/maanijou/imageservice/image"
 	"github.com/maanijou/imageservice/middleware"
 )
 
 func main() {
 	log.Println("Running Image app.")
-	database.InitDatabase("image")
+	err := database.InitDatabase("image")
+	if err != nil {
+		log.Fatal("Cannot initiate the database. exiting...")
+	}
+	err = database.GlobalDB.AutoMigrate(&image.Image{})
+	if err != nil {
+		log.Fatal("Cannot migrate image database. exiting...")
+	}
 	sm := mux.NewRouter().StrictSlash(true) // ignoring trailing slash
 	sm = sm.PathPrefix("/api/v1/").Subrouter()
-
 	sm.Use(middleware.LoggingMiddleware)
 	sm.Use(middleware.CorsMiddleware)
+
 	// A quick test if server is up and running!
 	sm.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status": "ok"}`))
 	})
+
+	image.SetupRoutes(sm)
 
 	s := http.Server{
 		Addr:         ":8080",           // configure the bind address
