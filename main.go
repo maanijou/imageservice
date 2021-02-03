@@ -12,6 +12,7 @@ import (
 	"github.com/maanijou/imageservice/database"
 	"github.com/maanijou/imageservice/image"
 	"github.com/maanijou/imageservice/middleware"
+	"github.com/maanijou/imageservice/monitoring"
 )
 
 func main() {
@@ -29,13 +30,7 @@ func main() {
 	sm.Use(middleware.LoggingMiddleware)
 	sm.Use(middleware.CorsMiddleware)
 
-	// A quick test if server is up and running!
-	sm.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "ok"}`))
-	})
-
+	monitoring.SetupMonitoring(sm)
 	image.SetupRoutes(sm)
 
 	s := http.Server{
