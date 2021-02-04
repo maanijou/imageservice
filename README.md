@@ -2,6 +2,8 @@
 
 Yet another image service for you!
 
+![example workflow name](https://github.com/maanijou/imageservice/workflows/Go/badge.svg)
+
 # Possible improvement
 
 * Separate conversion api into another web service.
