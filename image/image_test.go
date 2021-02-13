@@ -37,12 +37,12 @@ var clearThese []string
 
 func TestMain(m *testing.M) {
 	route, err := setup()
-	sm = route
 	if err != nil {
 		teardown()
 		os.Exit(-1)
 		return
 	}
+	sm = route
 	code := m.Run()
 	teardown()
 	os.Exit(code)
