@@ -1,6 +1,6 @@
 # Image Service
 
-Yet another image service for you!
+Yet another image service for you! Use this service to handle image upload and downloads in your projects.
 
 ![example workflow name](https://github.com/maanijou/imageservice/workflows/Go/badge.svg)
 
